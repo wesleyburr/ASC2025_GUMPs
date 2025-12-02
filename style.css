@@ -105,3 +105,7 @@ em {
 .reveal code {
     max-height: 100% !important; /* Remove any maximum height restrictions */
 }
+
+.reveal .slide-number {
+      display: none;
+}

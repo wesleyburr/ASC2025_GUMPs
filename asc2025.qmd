@@ -1,0 +1,246 @@
+---
+title: "~~Smoothing~~ Estimation ~~and Signal Detection~~ for Generalized Uniformly Modulated Processes"
+author: "Wesley S. Burr, Skye P. Griffith, Glen Takahara"
+editor: visual
+institute: "Trent University, University of Toronto, Queen's University"
+execute: 
+  echo: true
+format:
+  revealjs:
+    theme: default
+    margin: 0.05
+    incremental: false
+    logo: TUPMS.png
+    css: style.css
+    pdf-separate-fragments: false
+    auto-stretch: false
+slide-number: true
+smaller: false
+---
+
+## Uniformly Modulated Processes
+
+> Happy families are all alike; every unhappy family is unhappy in its own way. 
+>  - Leo Tolstoy
+
+Stationary processes are great. Nonstationary processes are ...  
+
+Uniformly Modulated Processes are a particularly nice framework for examining
+nonstationarity. Given $Y(t)$ a stationary process, write:
+
+$$
+X(t) = c(t) Y(t).
+$$
+
+Their evolutionary power spectra are the 
+(outer) product of the transformed modulating time function 
+and the stationary spectrum of $Y$. For nonstationary processes, they are quite constrained^[And
+they have a nice decomposition: taking the SVD of the TFS and 
+extracting the first singular vector gives an estimate of $c(t)$.].
+
+## Aside
+
+Estimators of the spectrogram vary; we largely focus
+on high-resolution spectrograms estimated using multiple Slepian
+tapers, typically using quadratic inverse methods and boundary
+corrections applied^[Moghtaderi, A. *Multitaper Methods for Time-Frequency 
+Spectrum Estimation and Unaliasing of Harmonic Frequencies.* (2009) and other, more recent references.].
+
+## Generalized Uniformly Modulated Processes
+
+We define a **Generalized** UMP (GUMP) to be a linear combination
+of UMPs:
+
+$$
+X(t) = \sum_{i}^{k} c_j(t) Y_j(t)
+$$
+
+where each $c_j(t)$ is a Priestley-definition compatible modulating function
+(non-negative, Fourier transform maximized at $f=0$), and each $Y_j(t)$
+is a stationary process. 
+
+$$
+\qquad
+$$
+We refer to $X(t)$ as a GUMP-$k$. Today we will specifically
+be talking about the case of $k=2$. 
+
+## Why Are They Interesting?
+
+UMPs and GUMPs are (potentially) useful for modeling certain classes of physical 
+phenomena. Two common examples where they capture interesting dynamics are:
+
+* compounded seismic waves
+* electroencephalograms
+
+Let's walk through some pictures to set the stage^[For a simple example using AR(2) spectra and smoothly varying modulating functions, simulated, so we know the truth.]. 
+
+## {background-image="talk_tfs.png" background-size="contain"}
+
+## {background-image="demo.png" background-size="contain"}
+
+## {background-image="row_col.png" background-size="contain"}
+
+## GUMP-2 Estimation
+
+Start with $X(t)$, an observed nonstationary time series. And
+assume that we have a reasonable estimator of the Time-Frequency Spectrum (TFS).
+
+Then, assuming we have a GUMP-2^[An open question is: can we determine $k$?]: 
+
+* estimate the TFS
+* use the TFS to find estimates of the two modulating function transforms $g_1(t)$ and $g_2(t)$, and by extension, the stationary spectra
+$S_{Y_1}(f)$ and $S_{Y_2}(f)$
+    - from Priestley's original formulation for oscillatory processes, $g_i(t) = c_i^2(t)$ 
+
+For today, we will assume the two stationary series are
+uncorrelated, which helps 
+give the mixing combination as a simple(r) additive combination^[It would be lovely to relax this assumption, but it turns out that even this simplification is tricky enough to deal with.].
+
+## Scoping the Problem
+
+Practically speaking, this is just a matrix. Once we estimate
+the TFS, most of the considerations of time and frequency
+and traditional signal processing frameworks drop away.
+
+$$
+\left[
+\begin{array}{lcccr}
+&& \vdots & & \\
+\cdots & S_{X}(t_{i-1}, f_{j-1}) & S_X(t_{i-1}, f_j) & S_X(t_{i-1}, f_{j+1}) &\\
+ & S_{X}(t_i, f_{j-1}) & S_X(t_i, f_j) & S_X(t_i, f_{j+1}) &\\
+ & S_{X}(t_{i+1}, f_{j-1}) & S_X(t_{i+1}, f_j) & S_X(t_{i+1}, f_{j+1}) & \cdots \\
+ && \vdots && \\
+\end{array}
+\right]
+$$
+
+## Deceptively Simple?
+
+Any row has fixed time $t_0$, so:
+
+$$
+[ \cdots, S_X(t_0, f_{j-1}), S_X(t_0, f_j), S_X(t_0, f_{j+1}), \cdots ]
+$$
+
+which is, in general
+
+$$
+S_X(t_0, f_j) = c_1^2(t_0) S_{Y_1}(f_j) + c_2^2(t_0) S_{Y_2}(f_j)
+$$
+
+## Deceptively Simple?
+
+* How many unknowns? $2 \cdot N_q + 2 * N$
+* If we start working on the matrix, we can do standard operations: add, subtract, multiply and divide ...
+    - How many equations? 
+    
+## Deceptively Simple?
+
+* How many unknowns? $2 \cdot N_q + 2 * N$
+* If we start working on the matrix, we can do standard operations: add, subtract, multiply and divide ...
+    - How many equations? 
+     
+**It turns out: not enough.**
+
+## Punchline
+
+This problem that looked deceptively easy, and we had the example from UMPs
+of a solution path. We ... wasted a lot of time. And in the
+end, we're fairly convinced it's quite massively underparametrized. 
+
+**Alternatives??**
+
+## Blind-Source Separation
+
+Once you accept that it's an underdetermined system, there aren't a lot
+of options. This drops the problem squarely into the domain of
+Blind-Source Separation:
+
+* start with $k$ independent signals and mixing functions
+* the signals arrive at $m$ different receivers
+* take the eligible system (that is, $m \ngtr n$), and "do our best"
+
+And ... it works! (mostly ... a talk for another day)
+
+## {background-image="bss.png" background-size="contain"}
+
+## Conclusion
+
+Dimensionality is hard. Intuition does not always translate.
+
+But if you're stubborn, and keep smashing away, sometimes you can get
+"good enough" solutions^[The rest of the slides are some equation expansion references.].
+
+
+
+## Equations
+
+Say we zero-pad the spectra to have an arbitrary number, $N_q$, of
+estimated frequencies in the TFS. Time is fixed at $N$. We then have
+$2N$ unknowns for the discrete $c_1(t)$ and $c_2(t)$ function realizations.
+And, across the frequencies, we have $2 N_q$ unknown spectral coefficients,
+$S_{Y_1}(f)$ and $S_{Y_2}(f)$. 
+
+Is it possible, working only in the columns, to obtain enough equations
+to get a closed-form solution; obviously we have to pretend that each
+equation is independent, but that's sorta-kinda-true from the point
+of view of the modulating functions.
+
+For a given frequency $f_0$, we have:
+
+$$
+\begin{split}
+S_X(f_0, \cdot) &= \left[ S_X(f_0, 1), \cdots, S_X(f_0, N) \right] \\
+ &= \left[ c_1(1) \cdot S_{Y_1}(f_0) + c_2(1) \cdot S_{Y_2}(f_0), \cdots,
+ c_1(N) \cdot S_{Y_1}(f_0) + c_2(N) \cdot S_{Y_2}(f_0) \right]
+\end{split}
+$$
+
+## Equations
+
+This becomes a system of equations:
+
+$$
+\begin{split}
+S_X(f_0, 1) &= c_1(1) \cdot S_{Y_1}(f_0) + c_2(1) \cdot S_{Y_2}(f_0) \\
+ & \cdots \\
+S_X(f_0, N) &= c_1(N) \cdot S_{Y_1}(f_0) + c_2(N) \cdot S_{Y_2}(f_0) \\
+\end{split}
+$$
+
+This system has $N$ equations and $2N+2$ unknowns. Propagating this out
+across all frequencies, we have $N \cdot N_q$ equations, and $(2N+2) \cdot N_q$
+unknowns; massively underdetermined.
+
+However, if we zero-pad sufficiently, we might be able to claim that
+$S_{Y_1}(f_0) \approx S_{Y_1}(f_0 + \delta_f)$ and 
+$S_{Y_2}(f_0) \approx S_{Y_2}(f_0 + \delta_f)$. So pair up the equations
+side-by-side.
+
+## Equations
+
+This would then let us take the ratio of side-by-side columns, obtaining:
+
+$$
+\begin{split}
+S_X(f_0, 1) &= c_1(1) \cdot \overline{S_{Y_1}(f_0)} + c_2(1) \cdot \overline{S_{Y_2}(f_0)} \\
+S_X(f_0+\delta_f, 1) &= c_1(1) \cdot \overline{S_{Y_1}(f_0)} + c_2(1) \cdot \overline{S_{Y_2}(f_0)} \\
+ & \cdots \\
+S_X(f_0, N) &= c_1(N) \cdot \overline{S_{Y_1}(f_0)} + c_2(N) \cdot \overline{S_{Y_2}(f_0)} \\
+S_X(f_0+\delta_f, N) &= c_1(N) \cdot \overline{S_{Y_1}(f_0)} + c_2(N) \cdot \overline{S_{Y_2}(f_0)} \\
+\end{split}
+$$
+
+This is then $2N$ equations in $2N+2$ unknowns. Much closer, but still
+not there. 
+
+## Equations
+
+* We also thought about aggregation (summing down/across columns/rows). This failed for the same reason. 
+* We tried a set of nonlinear equations connecting rows and columns. This failed.
+* We tried initializing trial solutions for the spectra. This failed.
+* We tried using the SVD (like for UMPs); this failed.
+
+It seems tractable. It's actually not. Sometimes failure is as instructive
+as success, though!
